@@ -1,157 +1,284 @@
-/* ==================== CK3风格 - 全屏地图+悬浮UI ==================== */
+/* ==================== CK3风格布局 - 移动端深度优化版 ==================== */
 
-:root {
-  --bg-primary: #0d0a08;
-  --bg-secondary: #1a1410;
-  --bg-card: rgba(26, 20, 16, 0.92);
-  --bg-card-solid: #1e1812;
-  --bg-hover: #2a2018;
-  --bg-panel: rgba(13, 10, 8, 0.88);
-  --gold: #c9a84c;
-  --gold-dim: #8b7340;
-  --gold-light: #e8d4a0;
-  --gold-glow: rgba(201, 168, 76, 0.3);
-  --text-main: #d4c9b0;
-  --text-dim: #8a7e6b;
-  --text-bright: #f0e6d0;
-  --border-gold: rgba(90, 74, 48, 0.8);
-  --border-gold-solid: #5a4a30;
-  --red: #c94040;
-  --green: #7cb87c;
-  --blue: #6090c0;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-  --topbar-h: 48px;
-  --bottombar-h: 56px;
-  --tabbar-h: 52px;
-}
-
+/* ===== 基础重置 ===== */
 * {
-  margin: 0; padding: 0; box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
 html, body {
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  background: var(--bg-primary);
+  background: #0d0a08;
   font-family: 'Noto Serif SC', 'Cinzel', serif;
-  color: var(--text-main);
+  color: #d4c9b0;
   -webkit-font-smoothing: antialiased;
   -webkit-touch-callout: none;
   user-select: none;
   overscroll-behavior: none;
+  /* 安全区域适配 */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
-#app { width: 100%; height: 100%; position: relative; overflow: hidden; }
+#app {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
 
-/* ==================== CK3顶部栏 ==================== */
-.top-bar {
+/* 防止iOS橡皮筋 */
+body::before {
+  content: '';
   position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--topbar-h);
-  padding-top: var(--safe-top);
+  inset: 0;
+  background: #0d0a08;
+  z-index: -1;
+}
+
+/* ===== 通用触控优化 ===== */
+button, .county-item, .diplomacy-card, .save-card, .event-card {
+  /* 最小触控区域44px (Apple HIG标准) */
+  min-height: 44px;
+  min-width: 44px;
+  /* 触摸反馈 */
+  transition: transform 0.1s ease, opacity 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+button:active, .county-item:active, .diplomacy-card:active,
+.save-card:active, .event-card:active {
+  transform: scale(0.96);
+  opacity: 0.8;
+}
+
+/* ===== 标题画面 ===== */
+.title-screen {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #1a1410 0%, #0d0a08 50%, #1a1410 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.title-content {
+  text-align: center;
+  z-index: 1;
+}
+
+.title-crown {
+  font-size: clamp(48px, 10vh, 80px);
+  margin-bottom: 16px;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.title-text {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(24px, 5vh, 42px);
+  color: #c9a84c;
+  letter-spacing: 6px;
+  text-shadow: 0 2px 8px rgba(201,168,76,0.3);
+}
+
+.title-sub {
+  font-size: clamp(10px, 2vh, 14px);
+  color: #8a7e6b;
+  letter-spacing: 8px;
+  margin-top: 4px;
+}
+
+.title-buttons {
+  margin-top: clamp(20px, 4vh, 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.title-version {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  font-size: 11px;
+  color: #5a5040;
+}
+
+/* ===== 按钮 ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  min-height: 48px;
+  font-size: clamp(13px, 2.5vh, 16px);
+  font-family: inherit;
+  color: #d4c9b0;
+  background: rgba(26, 20, 16, 0.9);
+  border: 1px solid #3a3020;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.96);
+  background: rgba(201, 168, 76, 0.15);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #c9a84c, #a08030);
+  color: #1a1410;
+  border-color: #c9a84c;
+  font-weight: 600;
+}
+
+.btn-primary:active {
+  background: linear-gradient(135deg, #a08030, #806020);
+}
+
+.btn-large {
+  padding: 16px 40px;
+  font-size: clamp(16px, 3vh, 20px);
+  min-height: 56px;
+  border-radius: 8px;
+}
+
+/* ===== 游戏容器 ===== */
+.game-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== 地图全屏 ===== */
+.map-fullscreen {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ===== 顶部栏 ===== */
+.top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(36px, 6vh, 48px);
+  background: linear-gradient(180deg, rgba(13,10,8,0.95) 0%, rgba(13,10,8,0.7) 80%, transparent 100%);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 12px;
-  padding-right: 12px;
-  background: linear-gradient(180deg, rgba(13,10,8,0.95) 0%, rgba(13,10,8,0.75) 80%, transparent 100%);
-  z-index: 500;
-  pointer-events: auto;
+  padding: 0 clamp(8px, 2vw, 16px);
+  z-index: 100;
+  /* GPU加速 */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .top-date {
   font-family: 'Cinzel', serif;
-  font-size: 15px;
-  color: var(--gold);
+  font-size: clamp(11px, 2vh, 14px);
+  color: #c9a84c;
   letter-spacing: 2px;
-  font-weight: 600;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  flex-shrink: 0;
 }
 
 .top-resources {
   display: flex;
-  gap: 14px;
-  align-items: center;
+  gap: clamp(8px, 2vw, 16px);
 }
 
 .resource {
   display: flex;
   align-items: center;
-  gap: 3px;
-  font-size: 13px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  gap: 4px;
+  font-size: clamp(11px, 2vh, 13px);
 }
 
-.res-icon { font-size: 15px; }
-.res-val { color: var(--text-bright); font-weight: 700; min-width: 28px; text-align: right; }
+.res-icon {
+  font-size: clamp(12px, 2.2vh, 16px);
+}
 
-/* ==================== CK3底部信息栏 ==================== */
+.res-val {
+  font-weight: 600;
+  color: #ffd700;
+  min-width: 24px;
+}
+
+/* ===== 底部栏 ===== */
 .bottom-bar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: var(--bottombar-h);
-  padding-bottom: var(--safe-bottom);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: clamp(40px, 7vh, 52px);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: linear-gradient(0deg, rgba(13,10,8,0.95) 0%, rgba(13,10,8,0.7) 80%, transparent 100%);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 16px;
-  padding-right: 16px;
-  background: linear-gradient(0deg, rgba(13,10,8,0.95) 0%, rgba(13,10,8,0.75) 80%, transparent 100%);
-  z-index: 500;
-  pointer-events: auto;
+  padding: 0 clamp(8px, 2vw, 16px);
+  padding-bottom: max(env(safe-area-inset-bottom), 4px);
+  z-index: 100;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .bottom-hint {
-  font-size: 12px;
-  color: var(--text-dim);
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-  flex: 1;
+  font-size: clamp(10px, 1.8vh, 13px);
+  color: #8a7e6b;
 }
 
 .end-turn-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 20px;
-  background: linear-gradient(135deg, rgba(201,168,76,0.25), rgba(201,168,76,0.1));
-  border: 1px solid var(--gold-dim);
+  padding: 8px 16px;
+  min-height: 40px;
+  font-size: clamp(12px, 2.2vh, 14px);
+  font-family: inherit;
+  color: #c9a84c;
+  background: linear-gradient(135deg, #c9a84c, #a08030);
+  border: none;
   border-radius: 6px;
-  color: var(--gold);
-  font-family: 'Cinzel', serif;
-  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
-  letter-spacing: 1px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  transition: transform 0.1s ease;
 }
 
 .end-turn-btn:active {
-  background: linear-gradient(135deg, rgba(201,168,76,0.4), rgba(201,168,76,0.2));
-  transform: scale(0.96);
+  transform: scale(0.95);
 }
 
-/* ==================== CK3底部标签栏导航 ==================== */
+/* ===== 底部标签栏 ===== */
 .tab-bar {
-  position: fixed;
-  bottom: var(--bottombar-h);
-  left: 0; right: 0;
-  height: var(--tabbar-h);
-  padding-bottom: var(--safe-bottom);
+  position: absolute;
+  bottom: clamp(40px, 7vh, 52px);
+  left: 0;
+  right: 0;
+  height: clamp(44px, 8vh, 56px);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(13, 10, 8, 0.92);
+  border-top: 1px solid rgba(201, 168, 76, 0.15);
   display: flex;
   align-items: stretch;
   justify-content: space-around;
-  background: var(--bg-panel);
-  border-top: 1px solid var(--border-gold);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: 500;
-  pointer-events: auto;
+  z-index: 100;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .tab-btn {
@@ -161,243 +288,112 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  background: transparent;
+  background: none;
   border: none;
-  color: var(--text-dim);
+  color: #8a7e6b;
+  font-family: inherit;
   cursor: pointer;
-  transition: all 0.15s;
-  position: relative;
+  transition: all 0.15s ease;
+  min-height: 44px;
+  /* 增加触控区域 */
   padding: 4px 0;
-}
-
-.tab-btn:active {
-  background: rgba(201,168,76,0.1);
+  position: relative;
 }
 
 .tab-btn.active {
-  color: var(--gold);
+  color: #c9a84c;
 }
 
 .tab-btn.active::after {
   content: '';
   position: absolute;
-  top: 0; left: 20%; right: 20%;
-  height: 2px;
-  background: var(--gold);
-  border-radius: 0 0 2px 2px;
-}
-
-.tab-icon { font-size: 18px; line-height: 1; }
-.tab-label { font-size: 9px; letter-spacing: 0.5px; }
-
-/* ==================== 全屏地图 ==================== */
-.game-container {
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  position: relative;
-  overflow: hidden;
-}
-
-.map-fullscreen {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-
-.map-fullscreen .leaflet-container {
-  width: 100%;
-  height: 100%;
-  background: #0a0806;
-}
-
-/* 隐藏Leaflet默认控件样式 */
-.leaflet-control-attribution { display: none !important; }
-
-/* CK3风格缩放控件 */
-.ck3-zoom-control {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  border: 1px solid var(--border-gold) !important;
-  border-radius: 6px !important;
-  overflow: hidden;
-  background: var(--bg-panel) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
-}
-
-.ck3-zoom-btn {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  color: var(--text-main);
-  font-size: 18px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.ck3-zoom-btn:active {
-  background: rgba(201,168,76,0.2);
-}
-
-/* 领地标记 */
-.county-marker {
-  background: none !important;
-  border: none !important;
-}
-
-.county-pin {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  pointer-events: auto;
-  cursor: pointer;
-}
-
-.pin-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(0,0,0,0.6);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
-  z-index: 2;
-}
-
-.county-pin.player .pin-dot {
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--gold);
-  box-shadow: 0 0 8px var(--gold-glow), 0 1px 4px rgba(0,0,0,0.5);
-}
-
-.pin-flag {
-  position: absolute;
-  top: -18px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 14px;
-  z-index: 1;
-}
-
-.pin-flag::after {
-  content: '';
-  position: absolute;
   top: 0;
-  left: 2px;
-  width: 10px;
-  height: 7px;
-  background: #a06060;
-  clip-path: polygon(0 0, 100% 30%, 0 100%);
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: #c9a84c;
+  border-radius: 1px;
 }
 
-.county-pin.player .pin-flag::after {
-  background: var(--red);
+.tab-btn:active {
+  background: rgba(201, 168, 76, 0.1);
 }
 
-.pin-label {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
+.tab-icon {
+  font-size: clamp(16px, 3vh, 20px);
+  line-height: 1;
+}
+
+.tab-label {
+  font-size: clamp(9px, 1.5vh, 11px);
+  line-height: 1;
   white-space: nowrap;
-  font-family: 'Cinzel', serif;
-  font-size: 10px;
-  color: var(--text-bright);
-  text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);
-  letter-spacing: 0.5px;
-  pointer-events: none;
 }
 
-.county-pin.player .pin-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--gold-light);
-  text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 8px var(--gold-glow);
-}
-
-/* ==================== 悬浮面板 ==================== */
+/* ===== 悬浮面板 ===== */
 .floating-panel {
-  position: fixed;
-  z-index: 400;
-  background: var(--bg-card);
-  border: 1px solid var(--border-gold);
+  position: absolute;
+  z-index: 50;
+  background: rgba(13, 10, 8, 0.92);
+  border: 1px solid rgba(201, 168, 76, 0.2);
   border-radius: 8px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-  overflow: hidden;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  padding: clamp(8px, 1.5vh, 12px);
+  /* 性能优化：避免blur，用纯色背景 */
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  will-change: transform;
+  transform: translateZ(0);
+  max-height: 60vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* 左侧角色面板 - CK3风格 */
 .char-panel {
+  top: clamp(40px, 7vh, 52px);
   left: 8px;
-  top: calc(var(--topbar-h) + 8px);
-  width: 220px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  width: clamp(180px, 25vw, 260px);
+}
+
+.mini-panel {
+  top: clamp(40px, 7vh, 52px);
+  right: 8px;
+  width: clamp(140px, 18vw, 200px);
 }
 
 .char-panel-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 100%;
+  margin-bottom: 8px;
 }
 
 .char-portrait {
-  width: 64px;
-  height: 64px;
+  width: clamp(36px, 5vh, 48px);
+  height: clamp(36px, 5vh, 48px);
   border-radius: 50%;
-  border: 2px solid var(--border-gold-solid);
-  background: linear-gradient(135deg, #2a1f14, #1a1410);
+  background: linear-gradient(135deg, #c9a84c, #806020);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  position: relative;
 }
 
-.char-portrait::after {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border-radius: 50%;
-  border: 1px solid rgba(201,168,76,0.3);
+.portrait-emoji {
+  font-size: clamp(16px, 2.5vh, 22px);
 }
-
-.portrait-emoji { font-size: 28px; z-index: 1; }
-
-.char-info { flex: 1; min-width: 0; }
 
 .char-name {
-  font-family: 'Cinzel', serif;
-  color: var(--gold);
-  font-size: 13px;
+  font-size: clamp(13px, 2.2vh, 16px);
+  color: #c9a84c;
   font-weight: 600;
-  letter-spacing: 0.5px;
 }
 
 .char-title {
-  font-size: 10px;
-  color: var(--text-dim);
-  margin-top: 2px;
+  font-size: clamp(10px, 1.6vh, 12px);
+  color: #8a7e6b;
 }
 
 /* 属性条 */
 .stat-bars {
-  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -407,379 +403,347 @@ html, body {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-height: 20px;
 }
 
-.stat-bar-icon { font-size: 11px; width: 16px; text-align: center; }
+.stat-bar-icon {
+  font-size: clamp(12px, 2vh, 14px);
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
 
 .stat-bar-track {
   flex: 1;
-  height: 4px;
-  background: rgba(0,0,0,0.4);
-  border-radius: 2px;
+  height: 6px;
+  background: rgba(201, 168, 76, 0.15);
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .stat-bar-fill {
   height: 100%;
-  border-radius: 2px;
+  border-radius: 3px;
   transition: width 0.3s ease;
 }
 
 .stat-bar-val {
-  font-size: 10px;
-  color: var(--text-dim);
-  width: 20px;
+  font-size: clamp(10px, 1.5vh, 12px);
+  color: #d4c9b0;
+  width: 24px;
   text-align: right;
+  flex-shrink: 0;
 }
 
-/* 特质标签 */
+/* 特质 */
 .traits-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
-  justify-content: center;
+  gap: 4px;
+  margin-top: 6px;
 }
 
 .trait-tag {
-  font-size: 8px;
-  padding: 1px 5px;
-  border-radius: 3px;
-  background: rgba(201,168,76,0.12);
-  border: 1px solid rgba(201,168,76,0.25);
-  color: var(--text-dim);
+  font-size: clamp(9px, 1.4vh, 11px);
+  padding: 2px 6px;
+  background: rgba(201, 168, 76, 0.15);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  border-radius: 4px;
+  color: #c9a84c;
 }
 
-/* 右侧迷你信息面板 */
-.mini-panel {
-  right: 8px;
-  top: calc(var(--topbar-h) + 8px);
-  width: 180px;
-  padding: 10px;
-}
-
+/* 迷你面板 */
 .mini-panel-title {
-  font-family: 'Cinzel', serif;
-  font-size: 11px;
-  color: var(--gold-dim);
-  letter-spacing: 1px;
-  margin-bottom: 8px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--border-gold);
+  font-size: clamp(11px, 1.8vh, 13px);
+  color: #c9a84c;
+  margin-bottom: 6px;
+  font-weight: 600;
 }
 
-.mini-info-row {
+.mini-info-row, .info-row {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
-  padding: 3px 0;
+  align-items: center;
+  padding: clamp(4px, 0.8vh, 6px) 0;
+  font-size: clamp(11px, 1.8vh, 13px);
+  min-height: 28px;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.08);
 }
 
-.mini-info-row .label { color: var(--text-dim); }
-.mini-info-row .value { color: var(--text-bright); font-weight: 600; }
+.mini-info-row .label, .info-row .label {
+  color: #8a7e6b;
+}
 
-/* ==================== 内容面板（非地图视图） ==================== */
+.mini-info-row .value, .info-row .value {
+  font-weight: 600;
+}
+
+/* ===== 内容面板 ===== */
 .content-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 300;
-  background: rgba(13,10,8,0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: calc(var(--topbar-h) + 12px) 12px calc(var(--bottombar-h) + var(--tabbar-h) + 12px);
+  z-index: 80;
+  background: rgba(13, 10, 8, 0.95);
+  display: flex;
+  flex-direction: column;
+  /* 安全区域 */
+  padding-top: clamp(40px, 7vh, 52px);
+  padding-bottom: calc(clamp(44px, 8vh, 56px) + clamp(40px, 7vh, 52px) + env(safe-area-inset-bottom));
 }
 
 .content-scroll {
-  max-width: 600px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: clamp(8px, 2vw, 16px);
+  /* 滚动性能优化 */
+  will-change: scroll-position;
 }
 
-/* ==================== 卡片 ==================== */
+.view-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(16px, 3vh, 22px);
+  color: #c9a84c;
+  margin-bottom: clamp(8px, 1.5vh, 12px);
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+}
+
+/* ===== 卡片 ===== */
 .card {
-  background: var(--bg-card-solid);
-  border: 1px solid var(--border-gold-solid);
+  background: rgba(26, 20, 16, 0.8);
+  border: 1px solid rgba(201, 168, 76, 0.15);
   border-radius: 8px;
+  margin-bottom: clamp(8px, 1.5vh, 12px);
   overflow: hidden;
 }
 
 .card-header {
-  padding: 10px 14px;
-  background: rgba(201,168,76,0.08);
-  border-bottom: 1px solid var(--border-gold-solid);
-  font-family: 'Cinzel', serif;
-  font-size: 13px;
-  color: var(--gold);
-  letter-spacing: 1px;
+  font-size: clamp(12px, 2vh, 14px);
+  color: #c9a84c;
+  padding: clamp(8px, 1.2vh, 10px) clamp(10px, 2vw, 12px);
+  background: rgba(201, 168, 76, 0.08);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+  font-weight: 600;
 }
 
 .card-body {
-  padding: 12px 14px;
+  padding: clamp(6px, 1vh, 10px) clamp(10px, 2vw, 12px);
+}
+
+/* ===== 领地列表 ===== */
+.county-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
 }
-
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-}
-
-.info-row .label { color: var(--text-dim); }
-.info-row .value { color: var(--text-bright); font-weight: 600; }
-
-/* ==================== 领地列表 ==================== */
-.county-list { display: flex; flex-direction: column; gap: 6px; }
 
 .county-item {
-  padding: 10px 12px;
-  background: rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: clamp(10px, 1.5vh, 12px) clamp(8px, 2vw, 12px);
+  background: rgba(201, 168, 76, 0.05);
   border-radius: 6px;
   border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
+  min-height: 52px;
 }
 
 .county-item:active {
-  background: var(--bg-hover);
-  border-color: var(--border-gold-solid);
-  transform: scale(0.98);
+  background: rgba(201, 168, 76, 0.15);
+  border-color: rgba(201, 168, 76, 0.3);
 }
 
 .county-name {
-  font-family: 'Cinzel', serif;
-  color: var(--gold);
-  font-size: 13px;
+  font-size: clamp(13px, 2.2vh, 15px);
+  color: #c9a84c;
+  font-weight: 600;
 }
 
 .county-info {
   display: flex;
-  gap: 10px;
-  margin-top: 4px;
-  font-size: 11px;
-  color: var(--text-dim);
+  gap: clamp(8px, 2vw, 12px);
+  font-size: clamp(10px, 1.6vh, 12px);
+  color: #8a7e6b;
 }
 
-/* ==================== 外交 ==================== */
-.diplomacy-list { display: flex; flex-direction: column; gap: 8px; }
+/* ===== 外交列表 ===== */
+.diplomacy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
 .diplomacy-card {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--bg-card-solid);
-  border: 1px solid var(--border-gold-solid);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s;
+  gap: clamp(8px, 2vw, 12px);
+  padding: clamp(10px, 1.5vh, 12px) clamp(8px, 2vw, 12px);
+  background: rgba(201, 168, 76, 0.05);
+  border-radius: 6px;
+  border: 1px solid transparent;
+  min-height: 56px;
+  transition: all 0.15s ease;
 }
 
 .diplomacy-card:active {
-  background: var(--bg-hover);
-  transform: scale(0.98);
+  background: rgba(201, 168, 76, 0.15);
+  border-color: rgba(201, 168, 76, 0.3);
 }
 
 .dip-avatar {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  border: 2px solid var(--border-gold-solid);
-  background: linear-gradient(135deg, #2a1f14, #1a1410);
+  font-size: clamp(20px, 3.5vh, 28px);
+  width: clamp(36px, 5vh, 44px);
+  height: clamp(36px, 5vh, 44px);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  background: rgba(201, 168, 76, 0.1);
+  border-radius: 50%;
   flex-shrink: 0;
 }
 
-.dip-info { flex: 1; min-width: 0; }
-.dip-name { font-family: 'Cinzel', serif; color: var(--gold); font-size: 12px; }
-.dip-culture { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.dip-info {
+  flex: 1;
+  min-width: 0;
+}
 
-.dip-relation { text-align: right; }
-.relation-label { font-size: 11px; font-weight: 600; }
-.relation-val { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.dip-name {
+  font-size: clamp(12px, 2vh, 14px);
+  color: #d4c9b0;
+  font-weight: 600;
+}
 
-/* ==================== 事件 ==================== */
-.events-list { display: flex; flex-direction: column; gap: 6px; }
+.dip-culture {
+  font-size: clamp(10px, 1.5vh, 11px);
+  color: #8a7e6b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dip-relation {
+  text-align: center;
+  flex-shrink: 0;
+  min-width: 48px;
+}
+
+.relation-label {
+  font-size: clamp(10px, 1.6vh, 12px);
+  font-weight: 600;
+}
+
+.relation-val {
+  font-size: clamp(14px, 2.5vh, 18px);
+  color: #d4c9b0;
+  font-weight: 700;
+}
+
+/* ===== 事件列表 ===== */
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
 .event-card {
-  padding: 8px 10px;
-  background: var(--bg-card-solid);
-  border: 1px solid var(--border-gold-solid);
+  padding: clamp(8px, 1.2vh, 10px) clamp(8px, 2vw, 12px);
+  background: rgba(201, 168, 76, 0.05);
   border-radius: 6px;
-  font-size: 11px;
+  font-size: clamp(11px, 1.8vh, 13px);
+  line-height: 1.4;
+  border-left: 3px solid currentColor;
+  min-height: 40px;
 }
 
-/* ==================== 存档 ==================== */
-.save-list { display: flex; flex-direction: column; gap: 8px; }
-
-.save-card {
-  padding: 12px 14px;
-  background: var(--bg-card-solid);
-  border: 1px solid var(--border-gold-solid);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.save-card:active { background: var(--bg-hover); transform: scale(0.98); }
-.save-card.empty { opacity: 0.5; }
-.save-slot { font-family: 'Cinzel', serif; color: var(--gold); font-size: 13px; }
-.save-info { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
-.save-date { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
-
-/* ==================== 按钮 ==================== */
-.btn {
-  padding: 8px 16px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-gold-solid);
-  border-radius: 6px;
-  color: var(--text-main);
-  font-family: 'Noto Serif SC', serif;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.15s;
-  display: inline-flex;
-  align-items: center;
+/* ===== 存档列表 ===== */
+.save-list {
+  display: flex;
+  flex-direction: column;
   gap: 6px;
 }
 
-.btn:active { background: var(--bg-hover); transform: scale(0.97); }
-
-.btn-primary {
-  background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.08));
-  color: var(--gold);
-  border-color: var(--gold-dim);
+.save-card {
+  padding: clamp(12px, 2vh, 16px) clamp(10px, 2vw, 16px);
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-radius: 8px;
+  min-height: 56px;
+  transition: all 0.15s ease;
 }
 
-.btn-large { padding: 14px 28px; font-size: 15px; border-radius: 8px; }
+.save-card:active {
+  background: rgba(201, 168, 76, 0.2);
+  transform: scale(0.98);
+}
 
+.save-card.empty {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
+.save-slot {
+  font-size: clamp(13px, 2.2vh, 15px);
+  color: #c9a84c;
+  font-weight: 600;
+}
+
+.save-info {
+  font-size: clamp(10px, 1.6vh, 12px);
+  color: #8a7e6b;
+  margin-top: 4px;
+}
+
+/* ===== 操作按钮 ===== */
 .action-buttons {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 8px;
-  margin: 12px 0;
+  margin: clamp(8px, 1.5vh, 12px) 0;
 }
 
-.action-buttons .btn { width: 100%; justify-content: center; }
-
-/* ==================== 标题画面 ==================== */
-.title-screen {
-  width: 100vw; height: 100vh; height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(180deg, #1a1410 0%, #0d0a08 50%, #1a1410 100%);
-  position: relative;
-  overflow: hidden;
+.action-buttons .btn {
+  flex: 1;
+  min-width: 120px;
+  font-size: clamp(11px, 1.8vh, 13px);
+  padding: 10px 12px;
+  min-height: 44px;
 }
 
-.title-screen::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.1) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, rgba(139,115,85,0.05) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.title-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  z-index: 1;
-  padding: 20px;
-}
-
-.title-crown {
-  font-size: 72px;
-  animation: pulse 3s ease-in-out infinite;
-  filter: drop-shadow(0 0 20px rgba(201,168,76,0.3));
-}
-
-.title-text {
-  font-family: 'Cinzel', serif;
-  font-size: 32px;
-  color: var(--gold);
-  letter-spacing: 8px;
-  text-shadow: 0 2px 10px rgba(201,168,76,0.3);
-}
-
-.title-sub {
-  font-size: 12px;
-  color: var(--text-dim);
-  letter-spacing: 3px;
-}
-
-.title-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  max-width: 300px;
-  margin-top: 24px;
-}
-
-.title-buttons .btn { width: 100%; justify-content: center; }
-
-.title-version {
-  position: absolute;
-  bottom: 20px;
-  font-size: 10px;
-  color: var(--text-dim);
-  letter-spacing: 1px;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.08); opacity: 0.8; }
-}
-
-/* ==================== 对话框 ==================== */
+/* ===== 对话框 ===== */
 .dialog-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  z-index: 9998;
+  padding: 16px;
 }
 
 .dialog-box {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-gold-solid);
+  background: #1a1410;
+  border: 1px solid rgba(201, 168, 76, 0.3);
   border-radius: 12px;
-  padding: 24px;
-  max-width: 320px;
+  padding: clamp(16px, 3vh, 24px);
+  max-width: 360px;
   width: 100%;
   text-align: center;
 }
 
 .dialog-box h3 {
-  font-family: 'Cinzel', serif;
-  color: var(--gold);
-  font-size: 16px;
+  font-size: clamp(16px, 2.8vh, 20px);
+  color: #c9a84c;
   margin-bottom: 12px;
 }
 
 .dialog-box p {
-  font-size: 13px;
-  color: var(--text-main);
+  font-size: clamp(13px, 2.2vh, 15px);
+  color: #d4c9b0;
   margin-bottom: 16px;
-  line-height: 1.6;
+  line-height: 1.5;
   white-space: pre-line;
 }
 
@@ -789,82 +753,58 @@ html, body {
   justify-content: center;
 }
 
-.dialog-buttons .btn { flex: 1; justify-content: center; }
-
-/* ==================== 空状态 ==================== */
-.empty-state {
-  text-align: center;
-  color: var(--text-dim);
-  padding: 40px 20px;
-  font-size: 13px;
+.dialog-buttons .btn {
+  min-width: 80px;
 }
 
-/* ==================== 视图标题 ==================== */
-.view-title {
-  font-family: 'Cinzel', serif;
-  color: var(--gold-light);
-  font-size: 18px;
-  letter-spacing: 2px;
-}
-
-/* ==================== 响应式 ==================== */
-@media (max-width: 480px) {
-  .char-panel { width: 180px; padding: 8px; }
-  .char-portrait { width: 48px; height: 48px; }
-  .portrait-emoji { font-size: 22px; }
-  .char-name { font-size: 11px; }
-  .mini-panel { width: 150px; }
-  .top-date { font-size: 13px; }
-  .resource { font-size: 11px; gap: 2px; }
-  .tab-icon { font-size: 16px; }
-  .tab-label { font-size: 8px; }
-}
-
-@media (orientation: landscape) and (max-height: 420px) {
-  .char-panel { width: 160px; }
-  .char-portrait { width: 40px; height: 40px; }
-  .portrait-emoji { font-size: 18px; }
-  .mini-panel { display: none; }
-  :root { --topbar-h: 40px; --bottombar-h: 44px; --tabbar-h: 44px; }
-}
-
-/* ==================== 滚动条 ==================== */
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-gold-solid); border-radius: 2px; }
-
-::selection { background: rgba(201,168,76,0.3); color: var(--text-bright); }
-
-/* ==================== 游戏内加载界面 ==================== */
+/* ===== 加载覆盖层 ===== */
 .game-loading-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 900;
-  background: rgba(13,10,8,0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(13, 10, 8, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  z-index: 200;
 }
 
 .game-loading-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 32px 48px;
+  text-align: center;
 }
 
 .game-loading-icon {
-  font-size: 48px;
+  font-size: clamp(40px, 8vh, 64px);
   animation: swordSwing 1.5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.game-loading-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(14px, 2.5vh, 18px);
+  color: #c9a84c;
+  margin-top: 12px;
+  letter-spacing: 3px;
+}
+
+.game-loading-bar {
+  width: clamp(150px, 30vw, 240px);
+  height: 3px;
+  background: rgba(201, 168, 76, 0.2);
+  margin: 12px auto 0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.game-loading-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, transparent, #c9a84c, transparent);
+  animation: loadingSlide 1.5s ease-in-out infinite;
+}
+
+.game-loading-tip {
+  font-size: clamp(10px, 1.6vh, 12px);
+  color: #8a7e6b;
+  margin-top: 8px;
 }
 
 @keyframes swordSwing {
@@ -872,38 +812,110 @@ html, body {
   50% { transform: rotate(15deg); }
 }
 
-.game-loading-title {
-  font-family: 'Cinzel', serif;
-  font-size: 18px;
-  color: var(--gold);
-  letter-spacing: 4px;
-  text-shadow: 0 2px 8px rgba(201,168,76,0.3);
-}
-
-.game-loading-bar {
-  width: 200px;
-  height: 3px;
-  background: rgba(201,168,76,0.15);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.game-loading-bar-inner {
-  height: 100%;
-  width: 30%;
-  background: linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold-dim));
-  border-radius: 2px;
-  animation: loadingSlide 1.5s ease-in-out infinite;
-}
-
 @keyframes loadingSlide {
   0% { transform: translateX(-100%); }
-  100% { transform: translateX(400%); }
+  100% { transform: translateX(200%); }
 }
 
-.game-loading-tip {
-  font-size: 11px;
-  color: var(--text-dim);
-  letter-spacing: 1px;
-  min-height: 16px;
+/* ===== 空状态 ===== */
+.empty-state {
+  text-align: center;
+  padding: clamp(20px, 4vh, 40px);
+  color: #5a5040;
+  font-size: clamp(13px, 2.2vh, 15px);
+}
+
+/* ===== 移动端特殊适配 ===== */
+
+/* 小屏手机（高度<360px，如折叠屏或小手机横屏） */
+@media (max-height: 360px) {
+  .top-bar { height: 32px; }
+  .bottom-bar { height: 32px; }
+  .tab-bar { height: 36px; bottom: 32px; }
+  .tab-icon { font-size: 14px; }
+  .tab-label { font-size: 8px; }
+  .content-overlay {
+    padding-top: 32px;
+    padding-bottom: calc(36px + 32px + env(safe-area-inset-bottom));
+  }
+  .char-panel, .mini-panel {
+    padding: 6px;
+    max-height: 50vh;
+  }
+  .floating-panel { border-radius: 6px; }
+  .stat-bar-row { min-height: 16px; }
+  .stat-bar-track { height: 4px; }
+  .end-turn-btn { padding: 6px 12px; min-height: 32px; font-size: 11px; }
+}
+
+/* 超小屏（宽度<600px横屏） */
+@media (max-width: 600px) {
+  .char-panel { width: clamp(150px, 30vw, 200px); }
+  .mini-panel { width: clamp(120px, 22vw, 160px); }
+  .traits-row { gap: 3px; }
+  .trait-tag { font-size: 9px; padding: 1px 4px; }
+}
+
+/* 大屏手机/小平板 */
+@media (min-width: 768px) {
+  .char-panel { width: 260px; }
+  .mini-panel { width: 200px; }
+  .tab-btn { padding: 6px 0; }
+}
+
+/* iOS安全区域 */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .top-bar {
+    padding-top: env(safe-area-inset-top);
+    height: calc(clamp(36px, 6vh, 48px) + env(safe-area-inset-top));
+  }
+  .tab-bar {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ===== 滚动条美化 ===== */
+.content-scroll::-webkit-scrollbar,
+.floating-panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.content-scroll::-webkit-scrollbar-track,
+.floating-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.content-scroll::-webkit-scrollbar-thumb,
+.floating-panel::-webkit-scrollbar-thumb {
+  background: rgba(201, 168, 76, 0.3);
+  border-radius: 2px;
+}
+
+/* ===== Leaflet地图覆盖样式 ===== */
+.leaflet-container {
+  background: #0d0a08 !important;
+  font-family: inherit !important;
+}
+
+/* 地图标记优化触控 */
+.leaflet-marker-icon {
+  /* 增大点击区域 */
+  margin-left: -12px !important;
+  margin-top: -12px !important;
+}
+
+/* 隐藏Leaflet默认控件（移动端不需要） */
+@media (max-width: 768px) {
+  .leaflet-control-attribution,
+  .leaflet-control-zoom {
+    display: none !important;
+  }
+}
+
+/* ===== 触觉反馈（支持的设备） ===== */
+@media (hover: none) and (pointer: coarse) {
+  button:active, .county-item:active, .diplomacy-card:active,
+  .save-card:active, .tab-btn:active, .end-turn-btn:active {
+    /* 触觉反馈通过JS实现 */
+  }
 }

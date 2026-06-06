@@ -1,4 +1,4 @@
-// ==================== 游戏主入口（优化版）====================
+// ==================== 游戏主入口（移动端深度优化版）====================
 
 import { GameEngine } from './core/GameEngine';
 import { CK3Renderer } from './ui/CK3Renderer';
@@ -6,6 +6,23 @@ import './styles/ck3-layout.css';
 
 // 动态导入Leaflet（懒加载）
 let LeafletMapRenderer: typeof import('./ui/LeafletMapRenderer').LeafletMapRenderer | null = null;
+
+// ===== 触觉反馈 =====
+function vibrate(pattern: number | number[] = 10): void {
+  try {
+    if (navigator.vibrate) {
+      navigator.vibrate(pattern);
+    }
+  } catch {}
+}
+
+// 全局触觉反馈（事件委托）
+document.addEventListener('touchstart', (e) => {
+  const target = e.target as HTMLElement;
+  if (target.closest('button, .tab-btn, .county-item, .diplomacy-card, .save-card, .end-turn-btn')) {
+    vibrate(10);
+  }
+}, { passive: true });
 
 class GameApp {
   engine: GameEngine;
