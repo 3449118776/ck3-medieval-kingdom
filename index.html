@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a1410">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="screen-orientation" content="landscape">
+  <title>中世纪王国</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #0d0a08;
+      font-family: 'Noto Serif SC', 'Cinzel', serif;
+      color: #d4c9b0;
+      -webkit-font-smoothing: antialiased;
+      -webkit-touch-callout: none;
+      user-select: none;
+      overscroll-behavior: none;
+    }
+    #app {
+      width: 100%; height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    /* 防止iOS橡皮筋效果 */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #0d0a08;
+      z-index: -1;
+    }
+    /* 加载动画 */
+    .loading-screen {
+      position: fixed;
+      inset: 0;
+      background: #0d0a08;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s;
+    }
+    .loading-screen.hidden { opacity: 0; pointer-events: none; }
+    .loading-crown {
+      font-size: 64px;
+      margin-bottom: 24px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .loading-text {
+      font-family: 'Cinzel', serif;
+      font-size: 18px;
+      color: #c9a84c;
+      letter-spacing: 4px;
+    }
+    .loading-bar {
+      width: 200px;
+      height: 2px;
+      background: rgba(201,168,76,0.2);
+      margin-top: 16px;
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    .loading-bar-inner {
+      height: 100%;
+      background: #c9a84c;
+      animation: loading 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+    }
+    @keyframes loading {
+      0% { width: 0%; margin-left: 0; }
+      50% { width: 100%; margin-left: 0; }
+      100% { width: 0%; margin-left: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading-screen" id="loading">
+    <div class="loading-crown">👑</div>
+    <div class="loading-text">中世纪王国</div>
+    <div class="loading-bar"><div class="loading-bar-inner"></div></div>
+  </div>
+  <div id="app"></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
