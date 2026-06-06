@@ -1,15 +1,16 @@
-// ==================== 游戏主入口 ====================
+// ==================== 游戏主入口（优化版）====================
 
 import { GameEngine } from './core/GameEngine';
 import { CK3Renderer } from './ui/CK3Renderer';
-import { LeafletMapRenderer } from './ui/LeafletMapRenderer';
-import 'leaflet/dist/leaflet.css';
 import './styles/ck3-layout.css';
+
+// 动态导入Leaflet（懒加载）
+let LeafletMapRenderer: typeof import('./ui/LeafletMapRenderer').LeafletMapRenderer | null = null;
 
 class GameApp {
   engine: GameEngine;
   renderer: CK3Renderer;
-  mapRenderer: LeafletMapRenderer | null = null;
+  mapRenderer: any = null;
 
   constructor() {
     this.engine = new GameEngine();
@@ -42,7 +43,18 @@ class GameApp {
     }
   }
 
-  setView(view: string): void {
+  // 懒加载地图渲染器
+  private async loadMapRenderer(): Promise<any> {
+    if (!LeafletMapRenderer) {
+      const mod = await import('./ui/LeafletMapRenderer');
+      LeafletMapRenderer = mod.LeafletMapRenderer;
+      // 动态加载Leaflet CSS
+      await import('leaflet/dist/leaflet.css');
+    }
+    return LeafletMapRenderer;
+  }
+
+  async setView(view: string): Promise<void> {
     // 清理地图
     if (this.mapRenderer) {
       this.mapRenderer.destroy();
@@ -52,40 +64,39 @@ class GameApp {
     this.engine.currentView = view as any;
     this.renderer.render();
 
-    // 初始化Leaflet地图
+    // 初始化Leaflet地图（懒加载）
     if (view === 'map' && this.engine.mapSystem) {
-      setTimeout(() => {
+      setTimeout(async () => {
         const container = document.getElementById('map-container');
         const ms = this.engine.mapSystem;
         if (container && ms) {
-          this.mapRenderer = new LeafletMapRenderer(this.engine, ms);
+          const MapRendererClass = await this.loadMapRenderer();
+          this.mapRenderer = new MapRendererClass(this.engine, ms);
           this.mapRenderer.init(container);
         }
       }, 50);
     }
   }
 
-  startNewGame(): void {
+  async startNewGame(): Promise<void> {
     try {
-      // 显示加载界面
-      this.renderer.render(); // 先渲染UI框架
+      this.renderer.render();
       this.showLoading('正在生成世界...');
 
-      // 延迟执行，让加载界面先显示
-      setTimeout(() => {
+      setTimeout(async () => {
         try {
           this.engine.startNewGame();
           this.engine.currentView = 'map' as any;
           this.renderer.render();
           this.updateLoadingTip('正在渲染地图...');
 
-          // 初始化Leaflet地图
           if (this.engine.mapSystem) {
-            setTimeout(() => {
+            setTimeout(async () => {
               const container = document.getElementById('map-container');
               const ms = this.engine.mapSystem;
               if (container && ms) {
-                this.mapRenderer = new LeafletMapRenderer(this.engine, ms);
+                const MapRendererClass = await this.loadMapRenderer();
+                this.mapRenderer = new MapRendererClass(this.engine, ms);
                 this.mapRenderer.init(container);
                 this.hideLoading();
               }
@@ -107,9 +118,7 @@ class GameApp {
 
   endTurn(): void {
     this.engine.endTurn();
-    // 地图视图时只更新悬浮面板，不重建地图
     if (this.engine.currentView === 'map') {
-      // 重新渲染悬浮面板
       const world = this.engine.world;
       const player = world?.getPlayer();
       const titleName = player?.domain_titles.length ? player.domain_titles[0].name : '无领地';
@@ -119,7 +128,6 @@ class GameApp {
       const dateEl = document.querySelector('.top-date');
       if (dateEl) dateEl.textContent = world?.getDateStr() || '';
 
-      // 更新资源
       if (player) {
         const vals = document.querySelectorAll('.res-val');
         if (vals[0]) vals[0].textContent = Math.floor(player.treasury).toString();
@@ -142,21 +150,22 @@ class GameApp {
     }
   }
 
-  loadGame(slot: number): void {
+  async loadGame(slot: number): Promise<void> {
     const result = this.engine.loadGame(slot);
     if (result.success) {
       this.engine.currentView = 'map' as any;
       this.renderer.render();
       this.showLoading('正在读取存档...');
 
-      setTimeout(() => {
+      setTimeout(async () => {
         this.updateLoadingTip('正在渲染地图...');
         if (this.engine.mapSystem) {
-          setTimeout(() => {
+          setTimeout(async () => {
             const container = document.getElementById('map-container');
             const ms = this.engine.mapSystem;
             if (container && ms) {
-              this.mapRenderer = new LeafletMapRenderer(this.engine, ms);
+              const MapRendererClass = await this.loadMapRenderer();
+              this.mapRenderer = new MapRendererClass(this.engine, ms);
               this.mapRenderer.init(container);
               this.hideLoading();
             }
@@ -171,12 +180,10 @@ class GameApp {
   }
 
   showCountyDetail(countyId: string): void {
-    // 在内容覆盖层显示
     const overlay = document.querySelector('.content-overlay .content-scroll');
     if (overlay) {
       overlay.innerHTML = this.renderer.renderCountyDetail(countyId);
     } else {
-      // 如果没有覆盖层，创建一个
       const gameContainer = document.querySelector('.game-container');
       if (gameContainer) {
         const div = document.createElement('div');
@@ -224,7 +231,6 @@ class GameApp {
     }
   }
 
-  // 加载界面控制
   private showLoading(tip?: string): void {
     const el = document.getElementById('game-loading');
     if (el) {
@@ -250,18 +256,47 @@ class GameApp {
   }
 }
 
-// 启动游戏
+// ==================== 横屏锁定 ====================
+function lockOrientation(): void {
+  // 尝试使用Screen Orientation API锁定横屏
+  const screenAny = screen as any;
+  if (screenAny.orientation && screenAny.orientation.lock) {
+    screenAny.orientation.lock('landscape').catch(() => {
+      // 如果API不支持，使用CSS兜底
+      console.log('Screen Orientation API not supported, using CSS fallback');
+    });
+  }
+
+  // iOS Safari专用：监听方向变化
+  window.addEventListener('orientationchange', () => {
+    const orientation = (screen as any).orientation || window.orientation;
+    if (orientation === 0 || orientation === 180) {
+      // 竖屏状态
+      document.body.style.transform = 'rotate(90deg)';
+      document.body.style.transformOrigin = 'center center';
+    } else {
+      document.body.style.transform = '';
+    }
+  });
+}
+
+// ==================== 启动游戏 ====================
 const app = new GameApp();
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => app.init());
+  document.addEventListener('DOMContentLoaded', () => {
+    app.init();
+    lockOrientation();
+  });
 } else {
   app.init();
+  lockOrientation();
 }
 
-// 注册Service Worker
+// 注册Service Worker（使用相对路径）
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  const swPath = import.meta.env.BASE_URL ? import.meta.env.BASE_URL + 'sw.js' : '/sw.js';
+  navigator.serviceWorker.register(swPath).catch(() => {});
 }
 
 // 防止移动端默认行为
