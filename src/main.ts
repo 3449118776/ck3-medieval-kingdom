@@ -293,13 +293,111 @@ if (document.readyState === 'loading') {
   lockOrientation();
 }
 
-// 注册Service Worker（使用相对路径）
+// ==================== PWA自动更新 ====================
+let updateAvailable = false;
+
+function showUpdateNotification(): void {
+  // 创建更新提示条
+  let bar = document.getElementById('update-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'update-bar';
+    bar.style.cssText = `
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: linear-gradient(90deg, #c9a84c, #d4af37);
+      color: #1a1410;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      animation: slideDown 0.3s ease;
+    `;
+    document.body.appendChild(bar);
+  }
+  bar.innerHTML = `
+    <span>🔄 发现新版本！点击更新获取最新内容</span>
+    <button id="update-btn" style="
+      background: #1a1410;
+      color: #c9a84c;
+      border: 1px solid #c9a84c;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    ">立即更新</button>
+  `;
+  bar.style.display = 'flex';
+
+  const btn = document.getElementById('update-btn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      // 触发页面刷新以加载新版本
+      window.location.reload();
+    });
+  }
+}
+
+// 注册Service Worker并监听更新
 if ('serviceWorker' in navigator) {
   const swPath = import.meta.env.BASE_URL ? import.meta.env.BASE_URL + 'sw.js' : '/sw.js';
-  navigator.serviceWorker.register(swPath).catch(() => {});
+
+  navigator.serviceWorker.register(swPath).then((registration) => {
+    // 监听新的Service Worker安装
+    registration.addEventListener('updatefound', () => {
+      const newWorker = registration.installing;
+      if (newWorker) {
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // 有新的SW等待激活
+            updateAvailable = true;
+            showUpdateNotification();
+          }
+        });
+      }
+    });
+
+    // 定期检查更新（每30分钟）
+    setInterval(() => {
+      registration.update().catch(() => {});
+    }, 30 * 60 * 1000);
+
+  }).catch(() => {});
+
+  // 监听来自SW的消息（当SW发现更新时）
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'NEW_VERSION_AVAILABLE') {
+      updateAvailable = true;
+      showUpdateNotification();
+    }
+  });
 }
+
+// 页面可见性变化时检查更新
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then((registration) => {
+      registration.update().catch(() => {});
+    });
+  }
+});
 
 // 防止移动端默认行为
 document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// 添加slideDown动画样式
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+  }
+`;
+document.head.appendChild(style);
 
 export default app;

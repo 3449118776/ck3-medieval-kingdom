@@ -21,14 +21,10 @@ export default defineConfig({
         main: './index.html'
       },
       output: {
-        // 代码分割：将第三方库单独打包
         manualChunks: {
-          // Leaflet单独分包，按需加载
           leaflet: ['leaflet'],
-          // 游戏核心逻辑
           game: ['./src/core/World.ts', './src/core/MapSystem.ts', './src/core/GameEngine.ts'],
         },
-        // 缓存友好的文件名
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
@@ -46,6 +42,7 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
       manifest: {
         name: '中世纪王国',
         short_name: '中世纪王国',
@@ -71,7 +68,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
-        // 缓存策略优化
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -80,7 +79,7 @@ export default defineConfig({
               cacheName: 'google-fonts-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1年
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
             },
           },
