@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" style="background:#0d0a08;margin:0;padding:0;overflow:hidden;border:none;outline:none">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#1a1410">
+  <meta name="theme-color" content="#0d0a08">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="screen-orientation" content="landscape">
   <title>中世纪王国</title>
   <!-- 预连接加速 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -87,61 +86,20 @@
       50% { width: 100%; margin-left: 0; }
       100% { width: 0%; margin-left: 100%; }
     }
-    /* 竖屏提示 */
-    .orientation-lock {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: #0d0a08;
-      z-index: 10000;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 20px;
-    }
-    .orientation-lock .rotate-icon {
-      font-size: 80px;
-      margin-bottom: 20px;
-      animation: rotatePhone 2s ease-in-out infinite;
-    }
-    .orientation-lock h2 {
-      color: #c9a84c;
-      font-size: 20px;
-      margin-bottom: 12px;
-    }
-    .orientation-lock p {
-      color: #8a7e6b;
-      font-size: 14px;
-    }
-    @keyframes rotatePhone {
-      0%, 100% { transform: rotate(0deg); }
-      25% { transform: rotate(-90deg); }
-      75% { transform: rotate(-90deg); }
-    }
-    @media screen and (orientation: portrait) {
-      .orientation-lock { display: flex; }
-    }
   </style>
   <!-- 异步加载字体 -->
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
-  <script type="module" crossorigin src="/ck3-medieval-kingdom/assets/main-BCQTMWfc.js"></script>
+  <script type="module" crossorigin src="/ck3-medieval-kingdom/assets/main-DfZuLj9C.js"></script>
   <link rel="modulepreload" crossorigin href="/ck3-medieval-kingdom/assets/game-CJmgkL3x.js">
   <link rel="stylesheet" crossorigin href="/ck3-medieval-kingdom/assets/main-D4VNt04X.css">
 <link rel="manifest" href="/ck3-medieval-kingdom/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/ck3-medieval-kingdom/registerSW.js"></script></head>
-<body>
+<body style="background:#0d0a08;margin:0;padding:0;overflow:hidden;border:none;outline:none">
   <div class="loading-screen" id="loading">
     <div class="loading-crown">👑</div>
     <div class="loading-text">中世纪王国</div>
     <div class="loading-bar"><div class="loading-bar-inner"></div></div>
   </div>
   <div id="app"></div>
-  <!-- 竖屏锁定提示 -->
-  <div class="orientation-lock" id="orientation-lock">
-    <div class="rotate-icon">📱</div>
-    <h2>请横屏游玩</h2>
-    <p>请将手机旋转至横屏模式以获得最佳游戏体验</p>
-  </div>
 </body>
 </html>
