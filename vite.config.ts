@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  base: '/ck3-medieval-kingdom/',
   root: '.',
   publicDir: 'public',
   build: {
